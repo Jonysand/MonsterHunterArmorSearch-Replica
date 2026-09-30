@@ -38,17 +38,20 @@ export default function ConfigTab() {
   const zeroAll = () => resetDecoCounts({});
 
   return (
-    <div className="space-y-5">
-      <section>
-        <h3 className="mb-2 text-sm font-semibold text-slate-700">装备的固定 · 除外</h3>
-        <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
+    <div className="flex flex-col gap-3">
+      <section className="card">
+        <header>
+          <span className="ttl">装备的固定 · 除外</span>
+          <span className="hd-note">每部位至多固定一件；勾选的防具不参与搜索</span>
+        </header>
+        <div className="pad grid items-start gap-3 md:grid-cols-2 xl:grid-cols-3">
           {PART_LABELS.map((label, part) => (
-            <fieldset key={label} className="rounded border border-slate-200 bg-white p-2 text-sm">
-              <legend className="px-1 text-xs font-semibold text-slate-500">{label}</legend>
-              <label className="mb-1 block">
-                <span className="mr-1 text-xs text-slate-500">固定</span>
+            <div key={label} className="subbox p-2.5">
+              <div className="group-hd mb-2">{label}</div>
+              <label className="mb-1.5 flex items-center gap-1.5">
+                <span className="flabel w-8 shrink-0">固定</span>
                 <select
-                  className="h-7 w-[calc(100%-36px)] rounded border border-slate-300 bg-white px-1"
+                  className="select min-w-0 flex-1"
                   value={pins[part as 0] ?? ""}
                   onChange={(e) => setPin(part as 0, e.target.value)}
                 >
@@ -60,12 +63,12 @@ export default function ConfigTab() {
                   ))}
                 </select>
               </label>
-              <div className="max-h-28 overflow-auto rounded border border-slate-100 p-1">
+              <div className="max-h-28 overflow-auto rounded-lg border border-[color:var(--w-line)] bg-[rgba(0,0,0,0.35)] p-1.5">
                 {(armorByPart[part] ?? []).map((a) => {
                   const list = excludes[part as 0] ?? [];
                   const checked = list.includes(a.name);
                   return (
-                    <label key={a.name} className="flex items-center gap-1 py-0.5 text-xs text-slate-600">
+                    <label key={a.name} className="flex cursor-pointer items-center gap-1.5 rounded px-1 py-0.5 text-[11px] text-[color:var(--w-ink-2)] hover:bg-[rgba(245,158,11,0.06)]">
                       <input
                         type="checkbox"
                         checked={checked}
@@ -76,57 +79,62 @@ export default function ConfigTab() {
                           setExcludes(part as 0, next);
                         }}
                       />
-                      {a.name}
+                      <span className="truncate" title={a.name}>
+                        {a.name}
+                      </span>
                     </label>
                   );
                 })}
               </div>
-            </fieldset>
+            </div>
           ))}
         </div>
       </section>
 
-      <section>
-        <div className="mb-2 flex flex-wrap items-center gap-2">
-          <h3 className="text-sm font-semibold text-slate-700">装饰品所持数</h3>
-          <button className="rounded border border-slate-300 px-2 py-0.5 text-xs hover:bg-slate-50" onClick={maxAll}>
+      <section className="card">
+        <header>
+          <span className="ttl">装饰品所持数</span>
+          <button className="btn sm" onClick={maxAll}>
             全部设为最大
           </button>
-          <button className="rounded border border-slate-300 px-2 py-0.5 text-xs hover:bg-slate-50" onClick={zeroAll}>
+          <button className="btn sm" onClick={zeroAll}>
             全部设为 0
           </button>
-          <span className="text-xs text-slate-400">留空 = 无限制</span>
-        </div>
-        {(
-          [
-            ["复合武器装饰品", allDecos.multi],
-            ["武器装饰品", allDecos.single],
-            ["防具装饰品", allDecos.armor],
-          ] as const
-        ).map(([label, list]) => (
-          <fieldset key={label} className="mb-3 rounded border border-slate-200 bg-white p-2">
-            <legend className="px-1 text-xs font-semibold text-slate-500">
-              {label}（{list.length}）
-            </legend>
-            <div className="flex flex-wrap gap-x-3 gap-y-1">
-              {list.map((d) => (
-                <label key={d.name} className="inline-flex items-center gap-1 text-xs text-slate-600">
-                  <span className="w-[132px] truncate text-right" title={d.name}>
-                    {d.name}
-                  </span>
-                  <input
-                    type="number"
-                    min={0}
-                    placeholder="∞"
-                    className="h-6 w-14 rounded border border-slate-300 px-1"
-                    value={decoInventory[d.name] ?? ""}
-                    onChange={(e) => setDecoCount(d.name, Number(e.target.value) || 0)}
-                  />
-                </label>
-              ))}
+          <span className="hd-note">留空 = 无限制</span>
+        </header>
+        <div className="pad grid items-start gap-3 xl:grid-cols-3">
+          {(
+            [
+              ["复合武器装饰品", allDecos.multi],
+              ["武器装饰品", allDecos.single],
+              ["防具装饰品", allDecos.armor],
+            ] as const
+          ).map(([label, list]) => (
+            <div key={label} className="subbox p-2.5">
+              <div className="group-hd mb-2">
+                {label}
+                <span className="n">{list.length}</span>
+              </div>
+              <div className="flex flex-col gap-1">
+                {list.map((d) => (
+                  <label key={d.name} className="flex items-center gap-1.5">
+                    <span className="w-[132px] shrink-0 truncate text-right text-[11px] text-[color:var(--w-ink-2)]" title={d.name}>
+                      {d.name}
+                    </span>
+                    <input
+                      type="number"
+                      min={0}
+                      placeholder="∞"
+                      className="input tight flex-1"
+                      value={decoInventory[d.name] ?? ""}
+                      onChange={(e) => setDecoCount(d.name, Number(e.target.value) || 0)}
+                    />
+                  </label>
+                ))}
+              </div>
             </div>
-          </fieldset>
-        ))}
+          ))}
+        </div>
       </section>
     </div>
   );

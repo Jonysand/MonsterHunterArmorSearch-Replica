@@ -11,12 +11,15 @@ interface SkillSelectProps {
 
 function SkillSelect({ skill, maxLevel, value, onChange }: SkillSelectProps) {
   return (
-    <label className="inline-flex min-w-[108px] flex-1 items-center gap-1 text-sm">
-      <span className="w-[84px] shrink-0 truncate text-right text-slate-600" title={skill}>
+    <label className="inline-flex min-w-[118px] flex-1 items-center gap-1.5">
+      <span
+        className="w-[84px] shrink-0 truncate text-right text-[11.5px] text-[color:var(--w-ink-2)]"
+        title={skill}
+      >
         {skill}
       </span>
       <select
-        className="h-7 min-w-0 flex-1 rounded border border-slate-300 bg-white px-1 text-sm"
+        className="select tight min-w-0 flex-1"
         value={value}
         onChange={(e) => onChange(Number(e.target.value))}
       >
@@ -51,28 +54,42 @@ export default function SkillPicker() {
     [],
   );
 
+  const selectedCount =
+    Object.values(armorSkills).filter((v) => v > 0).length +
+    Object.values(weaponSkills).filter((v) => v > 0).length;
+
   return (
-    <div className="space-y-3">
-      {groups.map((g) => (
-        <fieldset key={g.name} className="rounded border border-slate-200 bg-slate-50 p-2">
-          <legend className="px-1 text-xs font-semibold text-slate-500">{g.name}</legend>
-          <div className="flex flex-wrap gap-x-3 gap-y-1.5">
-            {g.items.map(([skill, maxLevel]) => {
-              const isWeapon = WEAPON_SKILLS.has(skill);
-              const value = isWeapon ? (weaponSkills[skill] ?? 0) : (armorSkills[skill] ?? 0);
-              return (
-                <SkillSelect
-                  key={skill}
-                  skill={skill}
-                  maxLevel={maxLevel}
-                  value={value}
-                  onChange={(lv) => (isWeapon ? setWeaponSkill(skill, lv) : setSkill(skill, lv))}
-                />
-              );
-            })}
+    <section className="card">
+      <header>
+        <span className="ttl">技能选择</span>
+        {selectedCount > 0 && <span className="cnt">已选 {selectedCount}</span>}
+        <span className="hd-note">选择需发动的技能等级；武器系技能由武器插槽补齐</span>
+      </header>
+      <div className="pad grid items-start gap-3 xl:grid-cols-2">
+        {groups.map((g) => (
+          <div key={g.name} className="subbox p-2.5">
+            <div className="group-hd mb-2">
+              {g.name}
+              <span className="n">{g.items.length}</span>
+            </div>
+            <div className="flex flex-wrap gap-x-3 gap-y-1.5">
+              {g.items.map(([skill, maxLevel]) => {
+                const isWeapon = WEAPON_SKILLS.has(skill);
+                const value = isWeapon ? (weaponSkills[skill] ?? 0) : (armorSkills[skill] ?? 0);
+                return (
+                  <SkillSelect
+                    key={skill}
+                    skill={skill}
+                    maxLevel={maxLevel}
+                    value={value}
+                    onChange={(lv) => (isWeapon ? setWeaponSkill(skill, lv) : setSkill(skill, lv))}
+                  />
+                );
+              })}
+            </div>
           </div>
-        </fieldset>
-      ))}
-    </div>
+        ))}
+      </div>
+    </section>
   );
 }

@@ -1,20 +1,589 @@
 @import "tailwindcss";
 
+/* =============================================================================
+   随包字体（与 MonsterOrderToolsV2 同源，合并为 tab 后直接复用宿主已注册的字族）
+   ============================================================================= */
+
+/* 思源黑体：正文 / 表单 / 表格，含 GB2312 一级常用字，冷僻字回落系统字体 */
+@font-face {
+  font-family: "MH Sans SC";
+  src: url("./assets/fonts/MH-Sans-SC-Common.woff2") format("woff2");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* 思源宋体：面板标题 / 装备名等衬线文案 */
+@font-face {
+  font-family: "MH Serif SC";
+  src: url("./assets/fonts/MH-Serif-SC-MonsterNames.woff2") format("woff2");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* DM Serif Display：数值 / 计数，碑刻感数字 */
+@font-face {
+  font-family: "MH DM Serif";
+  src: url("./assets/fonts/DMSerifDisplay-Regular.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* =============================================================================
+   设计令牌：与 MonsterOrderToolsV2 主窗口（控制台）配色完全一致，
+   合并为 tab 后两处 :root 定义同值不冲突；独立运行时由本文件兜底
+   ============================================================================= */
+
+:root {
+  color-scheme: dark;
+
+  /* 字体三元组：沿用 Tailwind 主题变量名，font-sans / font-serif 工具类一并生效 */
+  --font-sans: "MH Sans SC", "Noto Sans SC", "Source Han Sans SC", "PingFang SC",
+    "Microsoft YaHei", sans-serif;
+  --font-serif: "MH Serif SC", "MH Sans SC", "Noto Serif SC", "Source Han Serif SC",
+    "Songti SC", serif;
+  --font-num: "MH DM Serif", "MH Serif SC", serif;
+
+  /* 控制台配色令牌：对齐 Tailwind neutral + amber 体系 */
+  --w-bg: #0a0a0a;
+  --w-panel: rgba(23, 23, 23, 0.72);
+  --w-panel-solid: #171717;
+  --w-line: #262626;
+  --w-line-2: #333;
+  --w-line-3: #404040;
+  --w-ink: #e5e5e5;
+  --w-ink-2: #a3a3a3;
+  --w-ink-3: #737373;
+  --w-ink-4: #525252;
+  --amber: #f59e0b;
+  --amber-2: #fbbf24;
+  --amber-3: #fcd34d;
+}
+
 html,
 body,
 #root {
-  height: 100%;
+  min-height: 100%;
 }
 
 body {
   margin: 0;
-  font-family:
-    system-ui,
-    -apple-system,
-    "Segoe UI",
-    "Microsoft YaHei",
-    "PingFang SC",
-    sans-serif;
-  background: #f1f5f9;
-  color: #0f172a;
+  background: var(--w-bg);
+  color: var(--w-ink);
+  font-family: var(--font-sans);
+}
+
+/* =============================================================================
+   技能模拟器作用域（对齐宿主 .ml-scope / .rd-scope 的命名空间约定）
+   作为 MonsterOrderToolsV2 的一个 tab 嵌入时，高度交给宿主滚动容器
+   ============================================================================= */
+
+.sim-scope {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-height: 100%;
+  color: var(--w-ink);
+  font-size: 13px;
+}
+
+.sim-scope ::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.sim-scope ::-webkit-scrollbar-thumb {
+  background: #2a2a2a;
+  border-radius: 8px;
+}
+
+.sim-scope ::-webkit-scrollbar-thumb:hover {
+  background: #3a3a3a;
+}
+
+.sim-scope ::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* ------------------------------ 页头 ------------------------------ */
+
+.sim-scope .page-head {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex: 0 0 auto;
+}
+
+.sim-scope .page-head h1 {
+  margin: 0;
+  font-family: var(--font-serif);
+  font-size: 19px;
+  font-weight: 800;
+  letter-spacing: 0.03em;
+  color: #fafafa;
+}
+
+.sim-scope .page-head .sub {
+  margin: 4px 0 0;
+  font-size: 11px;
+  color: var(--w-ink-3);
+}
+
+.sim-scope .page-head .sub b {
+  color: var(--amber-2);
+  font-weight: 700;
+}
+
+.sim-scope .head-actions {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* 页签导航：激活态对齐宿主侧栏（amber-500/20 底 + amber-300 字） */
+.sim-scope .sim-tabs {
+  display: flex;
+  gap: 4px;
+  padding: 3px;
+  background: #0d0d0d;
+  border: 1px solid var(--w-line);
+  border-radius: 10px;
+  flex: 0 0 auto;
+  align-self: flex-start;
+}
+
+.sim-scope .sim-tabs button {
+  font-family: var(--font-sans);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--w-ink-3);
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 7px;
+  padding: 6px 16px;
+  cursor: pointer;
+  transition: 0.14s;
+  white-space: nowrap;
+}
+
+.sim-scope .sim-tabs button:hover {
+  color: var(--w-ink-2);
+  background: #1a1a1a;
+}
+
+.sim-scope .sim-tabs button.active {
+  background: rgba(245, 158, 11, 0.16);
+  border-color: rgba(245, 158, 11, 0.35);
+  color: var(--amber-3);
+}
+
+.sim-scope .sim-tabs button svg {
+  width: 13px;
+  height: 13px;
+}
+
+/* ------------------------------ 卡片 ------------------------------ */
+
+.sim-scope .card {
+  background: var(--w-panel);
+  border: 1px solid var(--w-line);
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.sim-scope .card > header {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  border-bottom: 1px solid #212121;
+}
+
+.sim-scope .card > header .ttl {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--w-ink);
+}
+
+.sim-scope .card > header .cnt {
+  font-family: var(--font-num);
+  font-size: 11px;
+  color: var(--amber-2);
+  background: rgba(245, 158, 11, 0.12);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  border-radius: 999px;
+  padding: 1px 8px;
+}
+
+.sim-scope .card > header .hd-note {
+  font-size: 10.5px;
+  color: var(--w-ink-4);
+}
+
+.sim-scope .card > .pad {
+  padding: 12px;
+}
+
+/* 卡片内嵌的深一档信息盒（对齐宿主 bg-neutral-950/80 内嵌盒） */
+.sim-scope .subbox {
+  background: rgba(10, 10, 10, 0.7);
+  border: 1px solid var(--w-line);
+  border-radius: 10px;
+}
+
+/* ------------------------------ 按钮 ------------------------------ */
+
+.sim-scope .btn {
+  font-family: var(--font-sans);
+  font-size: 11px;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 7px 11px;
+  border-radius: 8px;
+  border: 1px solid var(--w-line-2);
+  background: #1a1a1a;
+  color: var(--w-ink-2);
+  cursor: pointer;
+  transition: 0.14s;
+  white-space: nowrap;
+}
+
+.sim-scope .btn:hover {
+  background: #222;
+  color: var(--w-ink);
+}
+
+.sim-scope .btn.primary {
+  background: linear-gradient(180deg, var(--amber-2), var(--amber));
+  border-color: var(--amber);
+  color: #1c1917;
+}
+
+.sim-scope .btn.primary:hover {
+  filter: brightness(1.07);
+}
+
+.sim-scope .btn.danger {
+  color: #fca5a5;
+  border-color: rgba(239, 68, 68, 0.35);
+  background: rgba(239, 68, 68, 0.08);
+}
+
+.sim-scope .btn.danger:hover {
+  background: rgba(239, 68, 68, 0.16);
+  color: #fecaca;
+}
+
+.sim-scope .btn.sm {
+  padding: 4px 9px;
+  font-size: 10.5px;
+}
+
+.sim-scope .btn.lg {
+  padding: 9px 20px;
+  font-size: 12.5px;
+}
+
+.sim-scope .btn svg {
+  width: 13px;
+  height: 13px;
+}
+
+.sim-scope .btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.sim-scope .btn.primary:disabled {
+  background: linear-gradient(180deg, #35322c, #292620);
+  border-color: #3d3931;
+  color: var(--w-ink-4);
+  filter: none;
+}
+
+/* ------------------------------ 表单控件 ------------------------------ */
+
+.sim-scope .input,
+.sim-scope .select {
+  font-family: var(--font-sans);
+  background: #0b0b0b;
+  border: 1px solid var(--w-line);
+  border-radius: 8px;
+  padding: 7px 9px;
+  font-size: 12px;
+  color: var(--w-ink);
+  outline: none;
+  transition: 0.15s;
+}
+
+.sim-scope .select {
+  padding-right: 6px;
+}
+
+.sim-scope .input:focus,
+.sim-scope .select:focus {
+  border-color: rgba(245, 158, 11, 0.55);
+  box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.08);
+}
+
+.sim-scope .input::placeholder {
+  color: var(--w-ink-4);
+}
+
+/* 紧凑变体：技能选择器等高密度区域 */
+.sim-scope .select.tight,
+.sim-scope .input.tight {
+  padding-top: 4px;
+  padding-bottom: 4px;
+  font-size: 11.5px;
+}
+
+.sim-scope .input.tight {
+  padding-left: 8px;
+  padding-right: 8px;
+  font-size: 11px;
+}
+
+.sim-scope .input:disabled,
+.sim-scope .select:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.sim-scope .field {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.sim-scope .field > label,
+.sim-scope .flabel {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--w-ink-2);
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+
+.sim-scope input[type="checkbox"] {
+  accent-color: var(--amber);
+  width: 13px;
+  height: 13px;
+  cursor: pointer;
+}
+
+.sim-scope input[type="number"]::-webkit-outer-spin-button,
+.sim-scope input[type="number"]::-webkit-inner-spin-button {
+  opacity: 0.35;
+}
+
+/* 分组小标题（替代 fieldset legend 的角色） */
+.sim-scope .group-hd {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--amber-2);
+  letter-spacing: 0.04em;
+}
+
+.sim-scope .group-hd::before {
+  content: "";
+  width: 3px;
+  height: 11px;
+  border-radius: 2px;
+  background: linear-gradient(180deg, var(--amber-3), rgba(245, 158, 11, 0.25));
+}
+
+.sim-scope .group-hd .n {
+  font-family: var(--font-num);
+  font-size: 10px;
+  color: var(--w-ink-4);
+}
+
+/* ------------------------------ 徽标 / 芯片 ------------------------------ */
+
+.sim-scope .chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: #1d1d1d;
+  border: 1px solid #333;
+  border-radius: 6px;
+  padding: 2px 8px;
+  font-size: 11px;
+  color: #d4d4d4;
+}
+
+.sim-scope .chip.amber {
+  border-color: rgba(245, 158, 11, 0.5);
+  color: #fde68a;
+  background: rgba(245, 158, 11, 0.08);
+}
+
+.sim-scope .chip.green {
+  border-color: rgba(16, 185, 129, 0.4);
+  color: #6ee7b7;
+  background: rgba(16, 185, 129, 0.07);
+}
+
+.sim-scope .lv-badge {
+  display: inline-block;
+  font-family: var(--font-num);
+  font-size: 10px;
+  color: var(--amber-2);
+}
+
+/* ------------------------------ 表格 ------------------------------ */
+
+.sim-scope .sim-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+
+.sim-scope .sim-table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: #141414;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--w-ink-3);
+  text-align: left;
+  padding: 7px 8px;
+  border-bottom: 1px solid var(--w-line);
+  white-space: nowrap;
+}
+
+.sim-scope .sim-table tbody td {
+  padding: 6px 8px;
+  border-bottom: 1px solid #1c1c1c;
+  color: #d4d4d4;
+  vertical-align: top;
+}
+
+.sim-scope .sim-table tbody tr:hover td {
+  background: rgba(245, 158, 11, 0.05);
+}
+
+.sim-scope .sim-table .num {
+  font-family: var(--font-num);
+  font-size: 13px;
+  color: var(--amber-2);
+}
+
+.sim-scope .sim-table .dim {
+  color: var(--w-ink-4);
+}
+
+.sim-scope .empty-hint {
+  padding: 40px 0;
+  text-align: center;
+  color: var(--w-ink-4);
+  font-size: 11.5px;
+}
+
+.sim-scope .empty-hint svg {
+  width: 30px;
+  height: 30px;
+  color: #2e2e2e;
+  margin-bottom: 8px;
+}
+
+.sim-scope .empty-hint.compact {
+  padding: 20px 0;
+}
+
+.sim-scope .empty-hint.compact svg {
+  width: 20px;
+  height: 20px;
+  margin-bottom: 4px;
+}
+
+/* ------------------------------ 进度条 ------------------------------ */
+
+.sim-scope .prog {
+  height: 8px;
+  flex: 1;
+  min-width: 60px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #1a1a1a;
+  border: 1px solid var(--w-line);
+}
+
+.sim-scope .prog > i {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--amber), var(--amber-3));
+  transition: width 0.2s;
+  box-shadow: 0 0 8px rgba(245, 158, 11, 0.35);
+}
+
+.sim-scope .prog .pct,
+.sim-scope .pct {
+  font-family: var(--font-num);
+  font-size: 11px;
+  color: var(--amber-2);
+}
+
+/* ------------------------------ 吸底操作条 ------------------------------ */
+
+.sim-scope .action-bar {
+  position: sticky;
+  bottom: 0;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  background: rgba(14, 14, 14, 0.92);
+  border: 1px solid var(--w-line);
+  border-radius: 12px;
+  backdrop-filter: blur(6px);
+  box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.45);
+}
+
+/* ------------------------------ 提示条 ------------------------------ */
+
+.sim-scope .alert {
+  display: flex;
+  gap: 8px;
+  padding: 9px 10px;
+  border-radius: 8px;
+  font-size: 10.5px;
+  line-height: 1.6;
+}
+
+.sim-scope .alert svg {
+  width: 13px;
+  height: 13px;
+  flex: 0 0 auto;
+  margin-top: 1px;
+}
+
+.sim-scope .alert.info {
+  background: rgba(59, 130, 246, 0.07);
+  border: 1px solid rgba(59, 130, 246, 0.28);
+  color: #93c5fd;
+}
+
+.sim-scope .alert code {
+  font-family: var(--font-num);
+  color: #fcd34d;
 }

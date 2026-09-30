@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { Plus, Trash2 } from "lucide-react";
+import { Gem, Plus, Trash2 } from "lucide-react";
 import { useSimulator } from "../store/simulator";
 import { builtinCharms, SKILL_GROUPS } from "../lib/model";
 
@@ -44,128 +44,151 @@ export default function CharmTab() {
   };
 
   return (
-    <div className="space-y-4">
-      <section className="rounded border border-slate-200 bg-white p-3">
-        <h3 className="mb-2 text-sm font-semibold text-slate-700">登记护石</h3>
-        <div className="flex flex-wrap items-center gap-2 text-sm">
-          <select
-            className="h-8 rounded border border-slate-300 bg-white px-2"
-            value={skill}
-            onChange={(e) => setSkill(e.target.value)}
-          >
-            <option value="">技能1…</option>
-            {allSkillNames.map((n) => (
-              <option key={n} value={n}>
-                {n}
-              </option>
+    <div className="flex flex-col gap-3">
+      <section className="card">
+        <header>
+          <span className="ttl">登记护石</span>
+          <span className="hd-note">登记随机获得的护石，与内置护石共同参与搜索</span>
+        </header>
+        <div className="pad flex flex-col gap-3">
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+            <label className="field">
+              <span className="flabel">技能1</span>
+              <select className="select min-w-[130px]" value={skill} onChange={(e) => setSkill(e.target.value)}>
+                <option value="">（无）</option>
+                {allSkillNames.map((n) => (
+                  <option key={n} value={n}>
+                    {n}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="field">
+              <span className="flabel">等级</span>
+              <input
+                type="number"
+                min={1}
+                max={5}
+                className="input w-[60px]"
+                value={level}
+                onChange={(e) => setLevel(Math.max(1, Number(e.target.value) || 1))}
+              />
+            </label>
+            <label className="field">
+              <span className="flabel">技能2</span>
+              <select className="select min-w-[130px]" value={extraSkill} onChange={(e) => setExtraSkill(e.target.value)}>
+                <option value="">（无）</option>
+                {allSkillNames.map((n) => (
+                  <option key={n} value={n}>
+                    {n}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="field">
+              <span className="flabel">等级</span>
+              <input
+                type="number"
+                min={1}
+                max={5}
+                className="input w-[60px]"
+                value={extraLevel}
+                onChange={(e) => setExtraLevel(Math.max(1, Number(e.target.value) || 1))}
+              />
+            </label>
+          </div>
+          <div className="subbox flex flex-wrap items-center gap-x-4 gap-y-2 p-2.5">
+            <span className="flabel">插槽</span>
+            {[0, 1, 2].map((i) => (
+              <select
+                key={i}
+                className="select w-[74px]"
+                value={slots[i] ?? 0}
+                onChange={(e) => {
+                  const next = [...slots];
+                  next[i] = Number(e.target.value);
+                  setSlots(next);
+                }}
+              >
+                <option value={0}>--</option>
+                {[3, 2, 1].map((v) => (
+                  <option key={v} value={v}>
+                    Lv{v}
+                  </option>
+                ))}
+              </select>
             ))}
-          </select>
-          <input
-            type="number"
-            min={1}
-            max={5}
-            className="h-8 w-16 rounded border border-slate-300 px-2"
-            value={level}
-            onChange={(e) => setLevel(Math.max(1, Number(e.target.value) || 1))}
-          />
-          <select
-            className="h-8 rounded border border-slate-300 bg-white px-2"
-            value={extraSkill}
-            onChange={(e) => setExtraSkill(e.target.value)}
-          >
-            <option value="">技能2…</option>
-            {allSkillNames.map((n) => (
-              <option key={n} value={n}>
-                {n}
-              </option>
-            ))}
-          </select>
-          <input
-            type="number"
-            min={1}
-            max={5}
-            className="h-8 w-16 rounded border border-slate-300 px-2"
-            value={extraLevel}
-            onChange={(e) => setExtraLevel(Math.max(1, Number(e.target.value) || 1))}
-          />
-          <span className="text-slate-500">插槽</span>
-          {[0, 1, 2].map((i) => (
-            <select
-              key={i}
-              className="h-8 w-16 rounded border border-slate-300 bg-white px-1"
-              value={slots[i] ?? 0}
-              onChange={(e) => {
-                const next = [...slots];
-                next[i] = Number(e.target.value);
-                setSlots(next);
-              }}
-            >
-              <option value={0}>--</option>
-              {[3, 2, 1].map((v) => (
-                <option key={v} value={v}>
-                  Lv{v}
-                </option>
-              ))}
-            </select>
-          ))}
-          <button
-            className="inline-flex items-center gap-1 rounded bg-sky-600 px-3 py-1.5 text-white hover:bg-sky-700"
-            onClick={submit}
-          >
-            <Plus size={14} /> 添加
-          </button>
-          <button
-            className="rounded border border-slate-300 px-3 py-1.5 text-sm hover:bg-slate-50"
-            onClick={clearCharms}
-          >
-            删除全部
-          </button>
+            <span className="text-[10.5px] text-[color:var(--w-ink-4)]">按 Lv3 ≥ Lv2 ≥ Lv1 顺序填写</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <button className="btn primary" onClick={submit}>
+              <Plus /> 添加护石
+            </button>
+            <button className="btn danger" disabled={charms.length === 0} onClick={clearCharms}>
+              <Trash2 /> 删除全部
+            </button>
+          </div>
         </div>
       </section>
 
-      <section className="rounded border border-slate-200 bg-white">
-        <header className="border-b border-slate-200 px-3 py-2 text-sm font-semibold text-slate-700">
-          已登记护石（{charms.length}）
+      <section className="card">
+        <header>
+          <span className="ttl">已登记护石</span>
+          <span className="cnt">{charms.length}</span>
         </header>
-        <table className="w-full text-sm">
-          <tbody>
-            {charms.length === 0 && (
+        <div className="max-h-[360px] overflow-auto">
+          <table className="sim-table">
+            <thead>
               <tr>
-                <td className="px-3 py-3 text-slate-400">暂无自定义护石</td>
+                <th>护石</th>
+                <th>技能</th>
+                <th>插槽</th>
+                <th className="text-right">操作</th>
               </tr>
-            )}
-            {charms.map((c) => (
-              <tr key={c.id} className="border-b border-slate-100">
-                <td className="px-3 py-1.5">{c.name}</td>
-                <td className="px-3 py-1.5 text-slate-500">
-                  {Object.entries(c.skills)
-                    .map(([k, v]) => `${k}Lv${v}`)
-                    .join(" ")}
-                </td>
-                <td className="px-3 py-1.5 text-slate-500">
-                  {c.slots.filter((x) => x > 0).length ? `插槽[${c.slots.filter((x) => x > 0).join("-")}]` : "无插槽"}
-                </td>
-                <td className="px-3 py-1.5 text-right">
-                  <button
-                    className="inline-flex items-center gap-1 rounded border border-slate-300 px-2 py-0.5 text-xs hover:bg-slate-50"
-                    onClick={() => removeCharm(c.id)}
-                  >
-                    <Trash2 size={13} /> 删除
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {charms.length === 0 && (
+                <tr>
+                  <td colSpan={4}>
+                    <div className="empty-hint compact">
+                      <Gem />
+                      <div>暂无自定义护石，在上方登记后参与搜索</div>
+                    </div>
+                  </td>
+                </tr>
+              )}
+              {charms.map((c) => (
+                <tr key={c.id}>
+                  <td className="font-bold text-[color:#f5f5f5]">{c.name}</td>
+                  <td className="text-[11.5px] text-[color:var(--w-ink-3)]">
+                    {Object.entries(c.skills)
+                      .map(([k, v]) => `${k}Lv${v}`)
+                      .join(" ")}
+                  </td>
+                  <td className="text-[11.5px] text-[color:var(--w-ink-3)]">
+                    {c.slots.filter((x) => x > 0).length ? `插槽[${c.slots.filter((x) => x > 0).join("-")}]` : "无插槽"}
+                  </td>
+                  <td className="text-right">
+                    <button className="btn sm danger" onClick={() => removeCharm(c.id)}>
+                      <Trash2 /> 删除
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </section>
 
-      <section className="rounded border border-slate-200 bg-white">
-        <header className="border-b border-slate-200 px-3 py-2 text-sm font-semibold text-slate-700">
-          内置护石（任务获得，{builtins.length}）
+      <section className="card">
+        <header>
+          <span className="ttl">内置护石</span>
+          <span className="cnt">{builtins.length}</span>
+          <span className="hd-note">任务获得，直接参与搜索</span>
         </header>
-        <div className="flex max-h-64 flex-wrap gap-1.5 overflow-auto p-3">
+        <div className="pad flex max-h-64 flex-wrap gap-1.5 overflow-auto">
           {builtins.map((b) => (
-            <span key={b.name} className="rounded bg-slate-50 px-1.5 py-0.5 text-xs text-slate-600 ring-1 ring-slate-200">
+            <span key={b.name} className="chip">
               {b.name}
             </span>
           ))}

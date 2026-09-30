@@ -1,4 +1,4 @@
-import { BookmarkPlus, CircleStop, Loader2 } from "lucide-react";
+import { BookmarkPlus, CircleStop, Loader2, Sparkles } from "lucide-react";
 import { useSimulator } from "../store/simulator";
 import { DECO_BY_NAME, PART_LABELS } from "../lib/model";
 import type { SearchResult } from "../types";
@@ -49,42 +49,36 @@ export default function ResultTable() {
   if (!searching && results.length === 0 && !extraRunning && addableSkills.length === 0) return null;
 
   return (
-    <div className="mt-4 space-y-3">
+    <div className="flex flex-col gap-3">
       {(searching || results.length > 0) && (
-        <section className="rounded border border-slate-200 bg-white">
-          <header className="flex items-center gap-3 border-b border-slate-200 px-3 py-2">
-            <h3 className="text-sm font-semibold text-slate-700">
-              搜索结果 <span className="font-normal text-slate-500">{results.length} 件</span>
-            </h3>
+        <section className="card">
+          <header>
+            <span className="ttl">搜索结果</span>
+            <span className="cnt">{results.length}</span>
             {searching && (
               <>
-                <div className="h-2 flex-1 overflow-hidden rounded bg-slate-100">
-                  <div className="h-full bg-sky-500 transition-all" style={{ width: `${progress}%` }} />
+                <div className="prog mx-2">
+                  <i style={{ width: `${progress}%` }} />
                 </div>
-                <span className="text-xs text-slate-500">{progress}%</span>
-                <button
-                  className="inline-flex items-center gap-1 rounded border border-slate-300 px-2 py-0.5 text-xs hover:bg-slate-50"
-                  onClick={cancelSearch}
-                >
-                  <CircleStop size={14} /> 停止
+                <span className="pct">{progress}%</span>
+                <button className="btn sm danger" onClick={cancelSearch}>
+                  <CircleStop /> 停止
                 </button>
               </>
             )}
           </header>
-          <div className="max-h-[560px] overflow-auto">
-            <table className="w-full border-collapse text-sm">
-              <thead className="sticky top-0 bg-slate-50 text-xs text-slate-600">
+          <div className="max-h-[560px] overflow-auto rounded-b-xl">
+            <table className="sim-table">
+              <thead>
                 <tr>
-                  <th className="border-b border-slate-200 px-2 py-1.5 text-left">防御</th>
+                  <th>防御</th>
                   {PART_LABELS.map((p) => (
-                    <th key={p} className="border-b border-slate-200 px-2 py-1.5 text-left">
-                      {p}
-                    </th>
+                    <th key={p}>{p}</th>
                   ))}
-                  <th className="border-b border-slate-200 px-2 py-1.5 text-left">防具珠</th>
-                  <th className="border-b border-slate-200 px-2 py-1.5 text-left">武器珠</th>
-                  <th className="border-b border-slate-200 px-2 py-1.5 text-left">耐性</th>
-                  <th className="border-b border-slate-200 px-2 py-1.5 text-left">操作</th>
+                  <th>防具珠</th>
+                  <th>武器珠</th>
+                  <th>耐性</th>
+                  <th>操作</th>
                 </tr>
               </thead>
               <tbody>
@@ -94,30 +88,30 @@ export default function ResultTable() {
                     .map(([s, lv]) => `${s}Lv${lv}`)
                     .join(" ");
                   return (
-                    <tr key={i} title={skillText} className="odd:bg-white even:bg-slate-50/60 hover:bg-amber-50/60">
-                      <td className="px-2 py-1.5 font-semibold text-slate-800">{r.defense}</td>
+                    <tr key={i} title={skillText}>
+                      <td className="num">{r.defense}</td>
                       {r.parts.map((p, j) => (
-                        <td key={j} className="px-2 py-1.5 text-slate-700" title={p ? `防御 ${p.defense}` : undefined}>
-                          {p ? p.name : <span className="text-slate-400">无</span>}
+                        <td key={j} title={p ? `防御 ${p.defense}` : undefined}>
+                          {p ? (
+                            p.name
+                          ) : (
+                            <span className="dim">无</span>
+                          )}
                           {p && p.slots.some((x) => x > 0) && (
-                            <span className="ml-1 text-xs text-slate-400">
+                            <span className="lv-badge ml-1">
                               [{p.slots.filter((x) => x > 0).join("-")}]
                             </span>
                           )}
                         </td>
                       ))}
-                      <td className="max-w-[220px] px-2 py-1.5 text-xs text-slate-600">{decoSummary(r.armorDecos)}</td>
-                      <td className="max-w-[220px] px-2 py-1.5 text-xs text-slate-600">{decoSummary(r.weaponDecos)}</td>
-                      <td className="px-2 py-1.5 text-xs text-slate-600" title={RES_LABEL.map((l, i) => `${l}${r.resists[i]}`).join(" ")}>
+                      <td className="max-w-[220px] text-[11px] text-[color:var(--w-ink-3)]">{decoSummary(r.armorDecos)}</td>
+                      <td className="max-w-[220px] text-[11px] text-[color:var(--w-ink-3)]">{decoSummary(r.weaponDecos)}</td>
+                      <td className="text-[11px] text-[color:var(--w-ink-3)]" title={RES_LABEL.map((l, i) => `${l}${r.resists[i]}`).join(" ")}>
                         {RES_LABEL.map((l, i) => `${l}${r.resists[i] >= 0 ? "+" : ""}${r.resists[i]}`).join(" ")}
                       </td>
-                      <td className="px-2 py-1.5">
-                        <button
-                          className="inline-flex items-center gap-1 rounded border border-slate-300 px-1.5 py-0.5 text-xs hover:bg-slate-50"
-                          title="保存到我的套装"
-                          onClick={() => saveMySet(r)}
-                        >
-                          <BookmarkPlus size={13} /> 保存
+                      <td>
+                        <button className="btn sm" title="保存到我的套装" onClick={() => saveMySet(r)}>
+                          <BookmarkPlus /> 保存
                         </button>
                       </td>
                     </tr>
@@ -129,39 +123,38 @@ export default function ResultTable() {
         </section>
       )}
 
-      <section className="rounded border border-slate-200 bg-white p-3">
-        <div className="flex flex-wrap items-center gap-2">
-          <button
-            className="inline-flex items-center gap-1 rounded bg-slate-600 px-3 py-1 text-sm text-white hover:bg-slate-700 disabled:opacity-50"
-            disabled={extraRunning || searching}
-            onClick={runExtraSearch}
-          >
-            {extraRunning ? <Loader2 size={14} className="animate-spin" /> : null} 查询追加技能
-          </button>
-          {extraRunning && (
-            <>
-              <div className="h-2 w-40 overflow-hidden rounded bg-slate-100">
-                <div className="h-full bg-emerald-500 transition-all" style={{ width: `${extraProgress}%` }} />
-              </div>
-              <span className="text-xs text-slate-500">{extraProgress}%</span>
-              <button
-                className="inline-flex items-center gap-1 rounded border border-slate-300 px-2 py-0.5 text-xs hover:bg-slate-50"
-                onClick={cancelExtraSearch}
-              >
-                <CircleStop size={14} /> 停止
-              </button>
-            </>
+      <section className="card">
+        <header>
+          <span className="ttl">追加技能检索</span>
+          <span className="hd-note">枚举当前配装下还能追加发动的技能</span>
+        </header>
+        <div className="pad">
+          <div className="flex flex-wrap items-center gap-2.5">
+            <button className="btn" disabled={extraRunning || searching} onClick={runExtraSearch}>
+              {extraRunning ? <Loader2 className="animate-spin" /> : <Sparkles />} 查询追加技能
+            </button>
+            {extraRunning && (
+              <>
+                <div className="prog w-48" style={{ flex: "0 0 180px" }}>
+                  <i style={{ width: `${extraProgress}%` }} />
+                </div>
+                <span className="pct">{extraProgress}%</span>
+                <button className="btn sm danger" onClick={cancelExtraSearch}>
+                  <CircleStop /> 停止
+                </button>
+              </>
+            )}
+          </div>
+          {addableSkills.length > 0 && (
+            <div className="mt-2.5 flex flex-wrap gap-1.5">
+              {addableSkills.map((s) => (
+                <span key={s} className="chip green">
+                  {s}
+                </span>
+              ))}
+            </div>
           )}
         </div>
-        {addableSkills.length > 0 && (
-          <div className="mt-2 flex flex-wrap gap-1.5">
-            {addableSkills.map((s) => (
-              <span key={s} className="rounded bg-emerald-50 px-1.5 py-0.5 text-xs text-emerald-700 ring-1 ring-emerald-200">
-                {s}
-              </span>
-            ))}
-          </div>
-        )}
       </section>
     </div>
   );

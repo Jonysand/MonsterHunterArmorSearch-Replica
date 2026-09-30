@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { Gem, Search, Shirt, SlidersHorizontal } from "lucide-react";
 import { useSimulator, type TabKey } from "../store/simulator";
 import { DATA_VERSION } from "../lib/model";
 import SearchTab from "../components/SearchTab";
@@ -6,11 +7,11 @@ import MySetTab from "../components/MySetTab";
 import CharmTab from "../components/CharmTab";
 import ConfigTab from "../components/ConfigTab";
 
-const TABS: { key: TabKey; label: string }[] = [
-  { key: "search", label: "搜索" },
-  { key: "myset", label: "我的套装" },
-  { key: "charm", label: "护石" },
-  { key: "config", label: "装备设定" },
+const TABS: { key: TabKey; label: string; icon: typeof Search }[] = [
+  { key: "search", label: "技能搜索", icon: Search },
+  { key: "myset", label: "我的套装", icon: Shirt },
+  { key: "charm", label: "护石管理", icon: Gem },
+  { key: "config", label: "装备设定", icon: SlidersHorizontal },
 ];
 
 export function MainWindow() {
@@ -26,32 +27,36 @@ export function MainWindow() {
   }, []);
 
   return (
-    <main className="mx-auto max-w-[1100px] px-4 py-4">
-      <h1 className="mb-1 text-xl font-bold text-slate-800">MH Wilds 技能模拟器</h1>
-      <p className="mb-3 text-xs text-slate-400">
-        本地复刻版 · 数据版本 {DATA_VERSION} · 支持粘贴原站 mhwilds.wiki-db.com/sim 的分享链接
-      </p>
+    <div className="sim-scope mx-auto w-full max-w-[1200px] px-5 py-5">
+      <header className="page-head">
+        <div>
+          <h1>MH Wilds 技能模拟器</h1>
+          <p className="sub">
+            本地复刻版 · 数据版本 <b>{DATA_VERSION}</b> · 支持粘贴原站 <b>mhwilds.wiki-db.com/sim</b> 的分享链接恢复条件并搜索
+          </p>
+        </div>
+      </header>
 
-      <nav className="mb-4 flex gap-1 border-b border-slate-200">
-        {TABS.map((t) => (
-          <button
-            key={t.key}
-            className={`-mb-px rounded-t border-x border-t px-4 py-1.5 text-sm ${
-              tab === t.key
-                ? "border-slate-200 bg-white font-medium text-sky-700"
-                : "border-transparent text-slate-500 hover:text-slate-700"
-            }`}
-            onClick={() => setTab(t.key)}
-          >
-            {t.label}
-          </button>
-        ))}
+      <nav className="sim-tabs">
+        {TABS.map((t) => {
+          const Icon = t.icon;
+          return (
+            <button
+              key={t.key}
+              className={tab === t.key ? "active" : ""}
+              onClick={() => setTab(t.key)}
+            >
+              <Icon />
+              <span>{t.label}</span>
+            </button>
+          );
+        })}
       </nav>
 
       {tab === "search" && <SearchTab />}
       {tab === "myset" && <MySetTab />}
       {tab === "charm" && <CharmTab />}
       {tab === "config" && <ConfigTab />}
-    </main>
+    </div>
   );
 }

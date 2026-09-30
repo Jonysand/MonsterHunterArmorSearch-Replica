@@ -12,6 +12,16 @@ npm run build      # 生产构建（tsc && vite build）
 npm run preview    # 预览构建产物
 ```
 
+## UI 风格（与 MonsterOrderToolsV2 统一）
+
+本项目后续将作为 [MonsterOrderToolsV2](https://github.com/Jonysand/MonsterOrderToolsV2)（本机 `D:\MonsterOrderToolsV2`）的一个 tab 嵌入，
+界面与其主窗口（控制台）风格完全统一：
+
+- **配色令牌**：暗色 neutral-950 底 + 琥珀金 accent，`src/App.css` 的 `:root` 与宿主同值（`--w-bg/--w-panel/--w-line/--w-ink*/--amber*`），合并后不冲突
+- **字体**：随包内嵌与宿主同源的三套子集字体（`MH Sans SC` 正文 / `MH Serif SC` 标题 / `MH DM Serif` 数字），`font-sans` / `font-serif` 工具类直接可用
+- **组件类**：视图根节点统一挂 `.sim-scope` 命名空间（对齐宿主 `.ml-scope` / `.rd-scope` 约定），card / btn(primary·danger·sm) / sim-tabs / input·select(tight) / chip / prog 等组件类与宿主同构
+- **嵌入方式**：作为 tab 时把 `MainWindow` 渲染进宿主的滚动内容区即可（根容器 `min-height: 100%`，高度交给宿主），不需要任何样式适配
+
 ## 功能
 
 - **技能选择**：按分组（任务/道具/战斗/套装技能/Group Skill/武器技能等）选择需发动的技能与等级，数据与原站中文版一致

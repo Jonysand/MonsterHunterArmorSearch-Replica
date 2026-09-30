@@ -32,118 +32,116 @@ export default function SearchTab() {
   );
 
   return (
-    <div>
-      {/* 武器与系列技能 */}
-      <div className="flex flex-wrap items-center gap-3">
-        <label className="flex items-center gap-1 text-sm">
-          <select
-            className="h-8 rounded border border-slate-300 bg-white px-2 text-sm"
-            value={s.weaponSlots.join("-")}
-            onChange={(e) => s.setWeaponSlots(e.target.value ? e.target.value.split("-").map(Number) : [])}
-          >
-            {WEAPON_PATTERNS.map((p, i) => (
-              <option key={i} value={p.join("-")}>
-                {labelOf(p)}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label className="flex items-center gap-1 text-sm">
-          <span className="text-slate-500">Group Skill</span>
-          <select
-            className="h-8 rounded border border-slate-300 bg-white px-2 text-sm"
-            value={s.groupSkill}
-            onChange={(e) => s.setGroupSkill(e.target.value)}
-          >
-            <option value="">No group skill</option>
-            {GROUP_SKILLS.map((g) => (
-              <option key={g} value={g}>
-                {g}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label className="flex items-center gap-1 text-sm">
-          <span className="text-slate-500">系列技能</span>
-          <select
-            className="h-8 rounded border border-slate-300 bg-white px-2 text-sm"
-            value={s.seriesSkill}
-            onChange={(e) => s.setSeriesSkill(e.target.value)}
-          >
-            <option value="">无</option>
-            {SERIES_SKILLS.map((g) => (
-              <option key={g} value={g}>
-                {g}
-              </option>
-            ))}
-          </select>
-        </label>
-      </div>
+    <div className="flex flex-col gap-3">
+      {/* 武器与系列技能 + 数值条件 */}
+      <section className="card">
+        <header>
+          <span className="ttl">搜索条件</span>
+          <span className="hd-note">武器插槽 / 系列技能与数值门槛</span>
+        </header>
+        <div className="pad flex flex-col gap-3">
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+            <label className="field">
+              <span className="flabel">武器插槽</span>
+              <select
+                className="select"
+                value={s.weaponSlots.join("-")}
+                onChange={(e) => s.setWeaponSlots(e.target.value ? e.target.value.split("-").map(Number) : [])}
+              >
+                {WEAPON_PATTERNS.map((p, i) => (
+                  <option key={i} value={p.join("-")}>
+                    {labelOf(p)}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="field">
+              <span className="flabel">Group Skill</span>
+              <select
+                className="select"
+                value={s.groupSkill}
+                onChange={(e) => s.setGroupSkill(e.target.value)}
+              >
+                <option value="">无</option>
+                {GROUP_SKILLS.map((g) => (
+                  <option key={g} value={g}>
+                    {g}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="field">
+              <span className="flabel">系列技能</span>
+              <select
+                className="select"
+                value={s.seriesSkill}
+                onChange={(e) => s.setSeriesSkill(e.target.value)}
+              >
+                <option value="">无</option>
+                {SERIES_SKILLS.map((g) => (
+                  <option key={g} value={g}>
+                    {g}
+                  </option>
+                ))}
+              </select>
+            </label>
+          </div>
 
-      {/* 数值条件 */}
-      <div className="mt-3 flex flex-wrap items-center gap-4 rounded border border-slate-200 bg-slate-50 p-3 text-sm">
-        <label className="flex items-center gap-1">
-          <span className="text-slate-600">结果数</span>
-          <input
-            type="number"
-            min={1}
-            max={1000}
-            value={s.limit}
-            onChange={(e) => s.setLimit(Math.max(1, Number(e.target.value) || 200))}
-            className="h-8 w-20 rounded border border-slate-300 px-2"
-          />
-        </label>
-        <label className="flex items-center gap-1">
-          <span className="text-slate-600">最低防御力</span>
-          <input
-            type="number"
-            min={0}
-            value={s.minDefense}
-            onChange={(e) => s.setMinDefense(Math.max(0, Number(e.target.value) || 0))}
-            className="h-8 w-20 rounded border border-slate-300 px-2"
-          />
-        </label>
-        {RES_ITEMS.map((label, i) => (
-          <label key={label} className="flex items-center gap-1">
-            <span className="text-slate-600">{label}</span>
-            <select
-              className="h-8 rounded border border-slate-300 bg-white px-1 text-sm"
-              value={s.resMins[i]}
-              onChange={(e) => s.setResMin(i, Number(e.target.value))}
-            >
-              <option value={-100}>--</option>
-              {RES_VALUES.map((v) => (
-                <option key={v} value={v}>
-                  {v}
-                </option>
-              ))}
-            </select>
-          </label>
-        ))}
-      </div>
+          <div className="subbox flex flex-wrap items-center gap-x-4 gap-y-2 p-2.5">
+            <label className="field">
+              <span className="flabel">结果数</span>
+              <input
+                type="number"
+                min={1}
+                max={1000}
+                value={s.limit}
+                onChange={(e) => s.setLimit(Math.max(1, Number(e.target.value) || 200))}
+                className="input w-[72px]"
+              />
+            </label>
+            <label className="field">
+              <span className="flabel">最低防御力</span>
+              <input
+                type="number"
+                min={0}
+                value={s.minDefense}
+                onChange={(e) => s.setMinDefense(Math.max(0, Number(e.target.value) || 0))}
+                className="input w-[72px]"
+              />
+            </label>
+            {RES_ITEMS.map((label, i) => (
+              <label key={label} className="field">
+                <span className="flabel">{label}</span>
+                <select
+                  className="select w-[74px]"
+                  value={s.resMins[i]}
+                  onChange={(e) => s.setResMin(i, Number(e.target.value))}
+                >
+                  <option value={-100}>--</option>
+                  {RES_VALUES.map((v) => (
+                    <option key={v} value={v}>
+                      {v}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            ))}
+          </div>
+        </div>
+      </section>
 
       {/* 技能选择 */}
-      <div className="mt-4">
-        <SkillPicker />
-      </div>
+      <SkillPicker />
 
       {/* 操作按钮 */}
-      <div className="sticky bottom-0 mt-4 flex items-center gap-3 border-t border-slate-200 bg-white/95 py-3 backdrop-blur">
-        <button
-          className="inline-flex items-center gap-1.5 rounded bg-sky-600 px-4 py-2 text-sm font-medium text-white hover:bg-sky-700 disabled:opacity-60"
-          disabled={s.searching}
-          onClick={s.runSearch}
-        >
-          {s.searching ? <Loader2 size={15} className="animate-spin" /> : <Search size={15} />} 搜索
+      <div className="action-bar">
+        <button className="btn primary lg" disabled={s.searching} onClick={s.runSearch}>
+          {s.searching ? <Loader2 className="animate-spin" /> : <Search />} 搜索
         </button>
-        <button
-          className="inline-flex items-center gap-1.5 rounded border border-slate-300 px-3 py-2 text-sm hover:bg-slate-50 disabled:opacity-60"
-          disabled={s.searching}
-          onClick={s.reset}
-        >
-          <RotateCcw size={15} /> 重置
+        <button className="btn" disabled={s.searching} onClick={s.reset}>
+          <RotateCcw /> 重置
         </button>
-        <span className="text-xs text-slate-400">
+        <span className="ml-auto text-[11px] text-[color:var(--w-ink-4)]">
           已登记护石 {charmNames.length} 个（内置 + 自定义）
         </span>
       </div>
