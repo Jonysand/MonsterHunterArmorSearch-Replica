@@ -186,8 +186,17 @@ export function search(params: SearchParams, cb: EngineCallbacks): void {
         if (left > 0) leftWeapon[s] = left;
       }
       if (Object.keys(leftWeapon).length) {
+        // 护石的武器插槽（TU2 鉴定护石）并入武器珠可用槽位
+        const charmWeaponSlots: number[] = [];
+        for (let i = 0; i <= 5; i++) {
+          const p = assignment[i];
+          if (p?.weaponSlots) for (const s of p.weaponSlots) if (s > 0) charmWeaponSlots.push(s);
+        }
+        const wSlots = charmWeaponSlots.length
+          ? [...params.weaponSlots, ...charmWeaponSlots].sort((a, b) => b - a)
+          : params.weaponSlots;
         const solve = solveDecos({
-          slots: params.weaponSlots,
+          slots: wSlots,
           required: leftWeapon,
           decosBySkill: weaponDecoMap,
           inventory: params.decoInventory,
@@ -218,9 +227,14 @@ export function search(params: SearchParams, cb: EngineCallbacks): void {
     results.push({ parts: [...assignment], armorDecos: armorPlacement, weaponDecos: wp, defense, resists });
   }
 
-  /** prev 是否支配 cand（同部位、每档插槽与需求技能提供均 ≥） */
+  /** prev 是否支配 cand（同部位、每档插槽与需求技能提供均 ≥；武器插槽同口径比较） */
   function dominatedBy(cand: Piece, prev: Piece): boolean {
     for (let i = 0; i < 3; i++) if (cand.slots[i] > prev.slots[i]) return false;
+    if (cand.weaponSlots) {
+      const pw = prev.weaponSlots;
+      if (!pw) return false;
+      for (let i = 0; i < cand.weaponSlots.length; i++) if ((cand.weaponSlots[i] ?? 0) > (pw[i] ?? 0)) return false;
+    }
     for (const s in armorRequired) {
       if ((cand.skills[s] ?? 0) > (prev.skills[s] ?? 0)) return false;
     }

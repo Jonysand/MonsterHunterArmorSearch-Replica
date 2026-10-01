@@ -61,6 +61,8 @@ export interface Piece {
   cost: number;
   /** 槽位模式签名（同部位同模式可合并代表） */
   slotKey: string;
+  /** 护石专属：武器插槽等级列表（TU2 鉴定护石），仅参与武器珠解算 */
+  weaponSlots?: number[];
 }
 
 /** 搜索条件 */

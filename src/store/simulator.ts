@@ -4,16 +4,19 @@ import { PART_CHARM } from "../types";
 import { ARMORS, builtinCharms, maxLevelOf } from "../lib/model";
 import { extraSearch, search } from "../lib/engine";
 import { decodeHash, encodeHash } from "../lib/share";
+import { charmFingerprint } from "../lib/talismanImport";
 
 /** 用户自定义护石（localStorage 持久化，键名对齐原站风格） */
 const CHARM_KEY = "mhwilds-zh-hans-charms-v1";
 const MYSET_KEY = "mhwilds-zh-hans-myset-v1";
 
-interface CharmInput {
+export interface CharmInput {
   id: number;
   name: string;
   skills: Record<string, number>;
-  slots: number[]; // 插槽等级列表（降序）
+  slots: number[]; // 防具插槽等级列表（降序）
+  /** 武器插槽等级列表（TU2 鉴定护石，降序；常规登记护石无此字段） */
+  weaponSlots?: number[];
 }
 
 interface MySetEntry {
@@ -68,6 +71,8 @@ interface SimulatorState {
   setDecoCount: (name: string, n: number) => void;
   resetDecoCounts: (n: Record<string, number>) => void;
   addCharm: (c: Omit<CharmInput, "id">) => void;
+  /** 批量导入护石；dedupe 时按内容指纹跳过与现有/批内重复的条目，返回 {added, duplicate} */
+  importCharms: (items: Omit<CharmInput, "id">[], dedupe: boolean) => { added: number; duplicate: number };
   removeCharm: (id: number) => void;
   clearCharms: () => void;
   saveMySet: (r: SearchResult) => void;
@@ -133,6 +138,7 @@ function builtinCharmInputs(): CharmInput[] {
 
 function charmToPiece(c: CharmInput): Piece {
   const slots = [c.slots[0] ?? 0, c.slots[1] ?? 0, c.slots[2] ?? 0];
+  const weaponSlots = c.weaponSlots?.filter((s) => s > 0) ?? [];
   return {
     name: c.name,
     part: PART_CHARM,
@@ -142,6 +148,7 @@ function charmToPiece(c: CharmInput): Piece {
     resists: [0, 0, 0, 0, 0],
     cost: 0,
     slotKey: slots.join("-"),
+    ...(weaponSlots.length ? { weaponSlots } : {}),
   };
 }
 
@@ -223,6 +230,33 @@ export const useSimulator = create<SimulatorState>((set, get) => ({
       persistCharms(next);
       return { charms: next };
     }),
+  importCharms: (items, dedupe) => {
+    const seen = new Set<string>();
+    if (dedupe) {
+      for (const c of get().charms) seen.add(charmFingerprint(c));
+    }
+    const added: CharmInput[] = [];
+    let duplicate = 0;
+    for (const item of items) {
+      if (dedupe) {
+        const fp = charmFingerprint(item);
+        if (seen.has(fp)) {
+          duplicate++;
+          continue;
+        }
+        seen.add(fp);
+      }
+      added.push({ ...item, id: charmIdSeq++ });
+    }
+    if (added.length) {
+      set((s) => {
+        const next = [...s.charms, ...added];
+        persistCharms(next);
+        return { charms: next };
+      });
+    }
+    return { added: added.length, duplicate };
+  },
   removeCharm: (id) =>
     set((s) => {
       const next = s.charms.filter((c) => c.id !== id);

@@ -30,9 +30,38 @@ npm run preview    # 预览构建产物
 - **装饰品求解**：插槽级联桶模型（Lv1 珠可入高级插槽、反之不行），支持复合武器珠、所持数限制
 - **条件**：最低防御力、五属性耐性下限、各部位装备固定/除外、装饰品所持数（留空=无限）
 - **追加技能检索**：枚举当前配装下还能追加哪些技能（复刻原站"追加スキル検索"）
-- **护石管理**：内置护石（任务获得）+ 自定义护石登记，localStorage 持久化
+- **护石管理**：内置护石（任务获得）+ 自定义护石登记 + **批量导入**（见下），localStorage 持久化
 - **我的套装**：搜索结果一键保存
 - **分享链接兼容**：可直接粘贴原站的 `#skills=...&s=1&e=1&w=LV3-1-1&d=0&l=200` 格式链接自动恢复条件并搜索；本站搜索后同样生成该格式 hash
+
+### 护石批量导入
+
+护石管理页支持粘贴文件或选择 `.txt` 批量导入，格式与 REFramework
+[Talisman Exporter](https://www.nexusmods.com/monsterhunterwilds/mods/3087) mod 及原站"护石复制粘贴"导出一致。
+
+#### 导出步骤（游戏侧）
+
+1. 安装 [REFramework](https://www.nexusmods.com/monsterhunterwilds/mods/93)：把压缩包内的 `dinput8.dll` 解压到游戏根目录 `Steam\steamapps\common\MonsterHunterWilds`
+2. 安装 [Talisman Exporter](https://www.nexusmods.com/monsterhunterwilds/mods/3087)：把 `talisman_exporter.lua` 放入 `MonsterHunterWilds\reframework\autorun\`（没有该文件夹就手动创建）
+3. 启动游戏并加载存档，两种导出方式任选：
+   - **手动**：按 `Insert` 打开 REFramework 菜单 → Script Generated UI → Talisman Exporter → 点 `Export`
+   - **自动**：触发手动存档时（菜单里保存、返回主标题、退出游戏）自动写出一遍
+4. 导出文件位于 `MonsterHunterWilds\reframework\data\Talisman_Exporter\Exported_Talismans.txt`，把内容粘贴到本页"批量导入"输入框，或直接点"选择文件"选中该文件
+
+> 说明：该脚本是只读导出，不改存档、不联网上传，可放心在线使用；护石数量超过约 3000 时导出瞬间游戏可能短暂"未响应"，约 10 秒会自行恢复，属正常现象。
+
+#### 文件格式
+
+每行 12 个字段：
+
+```
+技能1名,技能1级,技能2名,技能2级,技能3名,技能3级, 防具槽×3, 武器槽×3
+Offensive Guard,1,Heroics,2,Peak Performance,1,2,1,0,0,0,0
+```
+
+- 英文技能名按原站官方 en/zh-hans 语言包逐条对齐自动翻译（`src/lib/skillNameMap.ts`，165 条，由 `research/align-skills.mjs` 生成）；中文技能名直接透传
+- 鉴定护石（TU2）的**武器插槽**与武器技能完整支持：武器槽并入武器珠解算槽池
+- 内容指纹去重（可关）、逐行错误报告（未知技能名/字段数不足等）、空行跳过
 
 ## 实现来源（逆向说明）
 
@@ -62,12 +91,14 @@ src/
 │   ├── model.ts     # 数据加载、+变体生成、技能索引
 │   ├── engine.ts    # 搜索引擎（分支限界 DFS + 时间片调度）
 │   ├── decoSolver.ts# 装饰品求解器
+│   ├── talismanImport.ts # 护石文本导入（Talisman Exporter / 原站格式解析）
+│   ├── skillNameMap.ts   # 技能名 en→zh 映射（原站双语包对齐生成）
 │   └── share.ts     # URL hash 编解码（原站格式兼容）
 ├── store/           # Zustand 状态
 ├── views/           # 主窗口
 └── components/      # 技能选择/结果表/护石/装备设定等
-scripts/             # 冒烟测试（tsx scripts/smoke.ts）
-research/            # 原站分析与数据提取材料
+scripts/             # 冒烟与导入验证（jiti scripts/smoke.ts / talisman-import-test.ts）
+research/            # 原站分析与数据提取材料（align-skills.mjs 生成技能名映射）
 ```
 
 ## 已知与原站的差异
