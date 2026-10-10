@@ -1,20 +1,22 @@
 # MH Wilds 技能模拟器（本地复刻版）
 
 对 [mhwilds.wiki-db.com/sim](https://mhwilds.wiki-db.com/sim/)（モンハーワイルド スキルシミュ(泣)）的本地功能复刻，
-技术栈与 `D:\VisualStudioProjects\MHDanmuToolsV2` 一致：**Vite 8 + React 19 + TypeScript + Tailwind CSS 4 + Zustand 5 + lucide-react**。
+技术栈与 MonsterOrderToolsV2 系列工具一致：**Vite 8 + React 19 + TypeScript + Tailwind CSS 4 + Zustand 5 + lucide-react**。
 
 ## 运行
 
 ```bash
 npm install
-npm run dev        # 开发（http://localhost:1420）
-npm run build      # 生产构建（tsc && vite build）
-npm run preview    # 预览构建产物
+npm run dev          # 开发（http://localhost:1420）
+npm run build        # 生产构建（tsc && vite build）
+npm run preview      # 预览构建产物
+npm run smoke        # 引擎冒烟：5 组搜索用例 + 技能核验
+npm run test:import  # 护石导入端到端验证；缺省读取游戏目录导出文件，无则以内置样例降级运行
 ```
 
 ## UI 风格（与 MonsterOrderToolsV2 统一）
 
-本项目后续将作为 [MonsterOrderToolsV2](https://github.com/Jonysand/MonsterOrderToolsV2)（本机 `D:\MonsterOrderToolsV2`）的一个 tab 嵌入，
+本项目后续将作为 [MonsterOrderToolsV2](https://github.com/Jonysand/MonsterOrderToolsV2) 的一个 tab 嵌入，
 界面与其主窗口（控制台）风格完全统一：
 
 - **配色令牌**：暗色 neutral-950 底 + 琥珀金 accent，`src/App.css` 的 `:root` 与宿主同值（`--w-bg/--w-panel/--w-line/--w-ink*/--amber*`），合并后不冲突
@@ -97,7 +99,7 @@ src/
 ├── store/           # Zustand 状态
 ├── views/           # 主窗口
 └── components/      # 技能选择/结果表/护石/装备设定等
-scripts/             # 冒烟与导入验证（jiti scripts/smoke.ts / talisman-import-test.ts）
+scripts/             # 冒烟与导入验证（npm run smoke / test:import，tsx 运行）
 research/            # 原站分析与数据提取材料（align-skills.mjs 生成技能名映射）
 ```
 

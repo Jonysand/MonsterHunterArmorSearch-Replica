@@ -1,4 +1,4 @@
-/** 引擎冒烟测试：node --import tsx scripts/smoke.ts */
+/** 引擎冒烟测试：npm run smoke */
 import { search } from "../src/lib/engine";
 import type { SearchParams, SearchResult } from "../src/types";
 import { ARMORS, ARMOR_BY_NAME, DECOS, DECO_BY_NAME } from "../src/lib/model";

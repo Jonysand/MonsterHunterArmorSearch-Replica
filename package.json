@@ -6,7 +6,9 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "smoke": "tsx scripts/smoke.ts",
+    "test:import": "tsx scripts/talisman-import-test.ts"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.3.3",
@@ -20,6 +22,7 @@
     "@types/react": "^19.1.8",
     "@types/react-dom": "^19.1.6",
     "@vitejs/plugin-react": "^6.0.2",
+    "tsx": "^4.23.15",
     "typescript": "~6.0.3",
     "vite": "^8.0.16"
   }
