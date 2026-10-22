@@ -6,6 +6,10 @@ node_modules/
 # Production build artifacts
 dist/
 dist-ssr/
+*.tsbuildinfo
+
+# Optional local third-party game tools (not required by save sync)
+external/
 
 # Logs
 logs/

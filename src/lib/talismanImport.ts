@@ -10,7 +10,10 @@
  */
 import { SKILL_NAME_EN_TO_ZH } from "./skillNameMap";
 import { SKILL_GROUPS, WEAPON_SKILLS } from "./model";
+import { charmDisplayName } from "./charmFormat";
 import type { CharmInput } from "../store/simulator";
+
+export { charmDisplayName, charmFingerprint } from "./charmFormat";
 
 /** 项目内全部合法中文技能名（防具 + 武器） */
 const ZH_SKILL_NAMES: ReadonlySet<string> = new Set([
@@ -30,30 +33,6 @@ export interface TalismanParseResult {
   errors: TalismanParseError[];
   /** 空行 / 全空护石等被忽略的行数 */
   skipped: number;
-}
-
-/** 护石内容指纹，用于去重（技能集合 + 两组插槽） */
-export function charmFingerprint(c: Pick<CharmInput, "skills" | "slots" | "weaponSlots">): string {
-  const skills = Object.entries(c.skills)
-    .sort((a, b) => a[0].localeCompare(b[0], "zh-Hans-CN"))
-    .map(([k, v]) => `${k}:${v}`)
-    .join(",");
-  const slots = (c.slots ?? []).join("-");
-  const weapon = (c.weaponSlots ?? []).join("-");
-  return `${skills}|${slots}|${weapon}`;
-}
-
-/** 按登记页同款规则生成护石名：技能Lv 并列 + 插槽/武器槽档位 */
-export function charmDisplayName(c: Pick<CharmInput, "skills" | "slots" | "weaponSlots">): string {
-  const skills = Object.entries(c.skills)
-    .map(([k, v]) => `${k}Lv${v}`)
-    .join(" ");
-  const armor = (c.slots ?? []).filter((s) => s > 0);
-  const weapon = (c.weaponSlots ?? []).filter((s) => s > 0);
-  let name = skills;
-  if (armor.length) name += `${name ? " ・" : ""}插槽${armor.join("-")}`;
-  if (weapon.length) name += `${name ? " ・" : ""}武器槽${weapon.join("-")}`;
-  return name || "无名护石";
 }
 
 function parseIntStrict(s: string): number | null {

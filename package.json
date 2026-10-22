@@ -5,10 +5,12 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc && vite build",
+    "build": "tsc && tsc -p tsconfig.server.json && vite build",
     "preview": "vite preview",
+    "sync": "tsx server/standalone.ts",
     "smoke": "tsx scripts/smoke.ts",
-    "test:import": "tsx scripts/talisman-import-test.ts"
+    "test:import": "tsx scripts/talisman-import-test.ts",
+    "test:sync": "tsx scripts/talisman-sync-test.ts"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.3.3",
@@ -19,6 +21,7 @@
     "zustand": "^5.0.15"
   },
   "devDependencies": {
+    "@types/node": "^26.6.5",
     "@types/react": "^19.1.8",
     "@types/react-dom": "^19.1.6",
     "@vitejs/plugin-react": "^6.0.2",

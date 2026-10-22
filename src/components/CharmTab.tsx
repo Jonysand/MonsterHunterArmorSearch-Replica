@@ -4,6 +4,7 @@ import { useSimulator } from "../store/simulator";
 import { builtinCharms, SKILL_GROUPS } from "../lib/model";
 import { parseTalismanText } from "../lib/talismanImport";
 import type { ImportReport } from "../lib/talismanImport";
+import GameSyncPanel from "./GameSyncPanel";
 
 /** 护石管理（复刻原站"鉴定护石"页：登记随机获得的护石，与内置护石共同参与搜索） */
 export default function CharmTab() {
@@ -73,6 +74,8 @@ export default function CharmTab() {
 
   return (
     <div className="flex flex-col gap-3">
+      <GameSyncPanel />
+
       <section className="card">
         <header>
           <span className="ttl">登记护石</span>
@@ -161,16 +164,16 @@ export default function CharmTab() {
 
       <section className="card">
         <header>
-          <span className="ttl">批量导入</span>
-          <span className="hd-note">支持 REFramework「Talisman Exporter」导出文件与原站护石复制粘贴格式</span>
+          <span className="ttl">批量导入（备用）</span>
+          <span className="hd-note">推荐直接使用上方「游戏数据同步」，无需安装 REFramework</span>
         </header>
         <div className="pad flex flex-col gap-3">
           <div className="text-[11px] leading-relaxed text-[color:var(--w-ink-3)]">
-            在游戏内按 Insert 打开 REFramework 菜单导出（文件位于
+            备用方案：若已安装 REFramework + Talisman Exporter，可在游戏内按 Insert 导出（文件位于
             <code className="mx-1 rounded bg-black/30 px-1 py-0.5 text-[10.5px] text-[color:var(--w-accent)]">
               reframework\data\Talisman_Exporter\Exported_Talismans.txt
             </code>
-            ），把文件内容粘贴到下方或直接选择文件；每行一个护石，英文技能名自动翻译为中文。
+            ），再粘贴到下方或选择文件；也可以直接粘贴原站格式。每行一个护石，英文技能名自动翻译为中文。
           </div>
           <textarea
             className="input h-36 resize-y font-mono text-[11px] leading-5"

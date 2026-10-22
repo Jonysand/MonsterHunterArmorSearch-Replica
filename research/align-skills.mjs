@@ -1,5 +1,6 @@
 // 从原站 EN / zh-hans 两个语言 bundle 中提取技能表，按条目顺序对齐生成 EN→zh-Hans 官方名称映射
-// 用法: node align-skills.mjs
+// 用法: node align-skills.mjs [Exported_Talismans.txt 路径]
+//       也可用环境变量 TALISMAN_EXPORT_PATH 指定；不提供则跳过覆盖率校验
 import fs from "node:fs";
 
 function balancedEnd(src, openIdx) {
@@ -134,18 +135,22 @@ if (zhW && enW && zhW.length === enW.length) {
 
 console.log("mapping entries:", Object.keys(mapping).length);
 
-// 覆盖率校验：导出文件中全部技能名必须能映射
-const file = fs
-  .readFileSync("D:/Steam/steamapps/common/MonsterHunterWilds/reframework/data/Talisman_Exporter/Exported_Talismans.txt", "utf8")
-  .split(/\r?\n/)
-  .filter(Boolean);
-const used = new Set();
-for (const l of file) {
-  const f = l.split(",");
-  for (const n of [f[0], f[2], f[4]]) if (n) used.add(n);
+// 覆盖率校验：导出文件中全部技能名必须能映射（路径由参数或环境变量提供）
+const exportPath = process.env.TALISMAN_EXPORT_PATH ?? process.argv[2];
+if (!exportPath) {
+  console.log("跳过覆盖率校验：设置 TALISMAN_EXPORT_PATH 或传入导出文件路径");
+} else if (!fs.existsSync(exportPath)) {
+  console.log("跳过覆盖率校验：文件不存在", exportPath);
+} else {
+  const file = fs.readFileSync(exportPath, "utf8").split(/\r?\n/).filter(Boolean);
+  const used = new Set();
+  for (const l of file) {
+    const f = l.split(",");
+    for (const n of [f[0], f[2], f[4]]) if (n) used.add(n);
+  }
+  const missing = [...used].filter((n) => !(n in mapping));
+  console.log("export file uses", used.size, "skills; missing in mapping:", missing.length ? missing : "none");
 }
-const missing = [...used].filter((n) => !(n in mapping));
-console.log("export file uses", used.size, "skills; missing in mapping:", missing.length ? missing : "none");
 
 fs.writeFileSync("skill-map-en-zh.json", JSON.stringify(mapping, null, 1), "utf8");
 console.log("written skill-map-en-zh.json");
